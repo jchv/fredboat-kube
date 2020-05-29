@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fredboat.fullname" . }}-lavalink
+  labels:
+    app: {{ include "fredboat.labels.app" . }}
+    component: lavalink
+    chart: {{ include "fredboat.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+  - port: 2333
+    name: lavalink
+  clusterIP: None
+  selector:
+    app: {{ include "fredboat.labels.app" . }}
+    component: lavalink

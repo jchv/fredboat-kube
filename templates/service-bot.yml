@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fredboat.fullname" . }}-bot
+  labels:
+    app: {{ include "fredboat.labels.app" . }}
+    component: bot
+    chart: {{ include "fredboat.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+  - port: 1356
+    name: fredboat
+  clusterIP: None
+  selector:
+    app: {{ include "fredboat.labels.app" . }}
+    component: bot

@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "fredboat.fullname" . }}-quarterdeck-networkpolicy
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ include "fredboat.labels.app" . }}
+      component: quarterdeck
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Fredboat bot talks to Quarterdeck.
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ include "fredboat.labels.app" . }}
+          component: bot
+    ports:
+    - protocol: TCP
+      port: 4269
+  egress:
+  # Quarterdeck talks to PostgreSQL.
+  - to:
+    - podSelector:
+        matchLabels:
+          app: {{ include "fredboat.labels.app" . }}
+          component: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Explicitly allow DNS.
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP

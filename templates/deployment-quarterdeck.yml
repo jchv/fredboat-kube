@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fredboat.fullname" . }}-quarterdeck
+  labels:
+    app: {{ include "fredboat.labels.app" . }}
+    component: quarterdeck
+    chart: {{ include "fredboat.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "fredboat.labels.app" . }}
+      component: quarterdeck
+  template:
+    metadata:
+      labels:
+        app: {{ include "fredboat.labels.app" . }}
+        component: quarterdeck
+    spec:
+      {{- if .Values.fredboat.quarterdeck.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.fredboat.quarterdeck.image.pullSecret }}
+      {{- end }}
+      containers:
+      - name: fredboat-quarterdeck
+        resources:
+          requests:
+            memory: 250Mi
+          limits:
+            memory: 350Mi
+        image: {{ .Values.fredboat.quarterdeck.image.repository }}:{{ .Values.fredboat.quarterdeck.image.tag }}
+        imagePullPolicy: {{ .Values.fredboat.quarterdeck.image.pullPolicy}}
+        command:
+        - java
+        - "-Xmx128m"
+        - "-jar"
+        - "Quarterdeck.jar"
+        ports:
+        - containerPort: 4269
+        volumeMounts:
+        - name: secret-volume
+          mountPath: /opt/Quarterdeck/quarterdeck.yaml
+          subPath: fredboat-quarterdeck.yaml
+      volumes:
+        - name: secret-volume
+          secret:
+            secretName: {{ include "fredboat.fullname" . }}-configs

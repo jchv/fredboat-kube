@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fredboat.fullname" . }}-bot
+  labels:
+    app: {{ include "fredboat.labels.app" . }}
+    component: bot
+    chart: {{ include "fredboat.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "fredboat.labels.app" . }}
+      component: bot
+  template:
+    metadata:
+      labels:
+        app: {{ include "fredboat.labels.app" . }}
+        component: bot
+    spec:
+      {{- if .Values.fredboat.bot.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.fredboat.bot.image.pullSecret }}
+      {{- end }}
+      containers:
+      - name: fredboat
+        resources:
+          requests:
+            memory: 250Mi
+          limits:
+            memory: 350Mi
+        image: {{ .Values.fredboat.bot.image.repository }}:{{ .Values.fredboat.bot.image.tag }}
+        imagePullPolicy: {{ .Values.fredboat.bot.image.pullPolicy}}
+        command:
+        - java
+        - "-Xmx128m"
+        - "-jar"
+        - "FredBoat.jar"
+        args: []
+        env:
+        - name: SPRING_RABBITMQ_ADDRESSES
+          value: amqp://guest:guest@fredboat-rabbitmq.default.svc.cluster.local
+        ports:
+        - containerPort: 1356
+        volumeMounts:
+        - name: secret-volume
+          mountPath: /opt/FredBoat/fredboat.yml
+          subPath: fredboat-bot.yaml
+        - name: secret-volume
+          mountPath: /opt/FredBoat/common.yml
+          subPath: fredboat-common.yaml
+      volumes:
+        - name: secret-volume
+          secret:
+            secretName: {{ include "fredboat.fullname" . }}-configs

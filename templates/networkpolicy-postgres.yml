@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "fredboat.fullname" . }}-postgres-networkpolicy
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ include "fredboat.labels.app" . }}
+      component: postgres
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Fredboat quarterdeck uses PostgreSQL.
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ include "fredboat.labels.app" . }}
+          component: quarterdeck
+    ports:
+    - protocol: TCP
+      port: 5432
+  # PostgreSQL does not make outgoing connections.
+  egress: []

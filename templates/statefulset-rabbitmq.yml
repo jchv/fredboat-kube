@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "fredboat.fullname" . }}-rabbitmq
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "fredboat.labels.app" . }}
+      component: rabbitmq
+  serviceName: "{{ include "fredboat.fullname" . }}-rabbitmq"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ include "fredboat.labels.app" . }}
+        component: rabbitmq
+    spec:
+      {{- if .Values.fredboat.rabbitmq.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.fredboat.rabbitmq.image.pullSecret }}
+      {{- end }}
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: fredboat-rabbitmq
+        resources:
+          requests:
+            memory: 150Mi
+          limits:
+            memory: 500Mi
+        image: {{ .Values.fredboat.rabbitmq.image.repository }}:{{ .Values.fredboat.rabbitmq.image.tag }}
+        imagePullPolicy: {{ .Values.fredboat.rabbitmq.image.pullPolicy}}
+        ports:
+        - name: broker
+          containerPort: 5672
+        - name: web-ui
+          containerPort: 15672

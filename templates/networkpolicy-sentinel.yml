@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "fredboat.fullname" . }}-sentinel-networkpolicy
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ include "fredboat.labels.app" . }}
+      component: sentinel
+  policyTypes:
+  - Ingress
+  - Egress
+  # Sentinel does not take incoming connections.
+  ingress: []
+  egress:
+  # Sentintel talks to RabbitMQ.
+  - to:
+    - podSelector:
+        matchLabels:
+          app: {{ include "fredboat.labels.app" . }}
+          component: rabbitmq
+    ports:
+    - protocol: TCP
+      port: 5672
+  # Sentinel talks to Discord, so allow internet access.
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/20
+  # Explicitly allow DNS.
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP

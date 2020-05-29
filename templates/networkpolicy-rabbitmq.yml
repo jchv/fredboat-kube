@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "fredboat.fullname" . }}-rabbitmq-networkpolicy
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ include "fredboat.labels.app" . }}
+      component: rabbitmq
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Fredboat bot uses RabbitMQ.
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ include "fredboat.labels.app" . }}
+          component: bot
+    ports:
+    - protocol: TCP
+      port: 5672
+  # Fredboat sentinel uses RabbitMQ.
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ include "fredboat.labels.app" . }}
+          component: sentinel
+    ports:
+    - protocol: TCP
+      port: 5672
+  egress:
+  # Explicitly allow DNS.
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP

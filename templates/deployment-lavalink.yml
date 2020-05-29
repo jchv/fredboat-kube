@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fredboat.fullname" . }}-lavalink
+  labels:
+    app: {{ include "fredboat.labels.app" . }}
+    component: lavalink
+    chart: {{ include "fredboat.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "fredboat.labels.app" . }}
+      component: lavalink
+  template:
+    metadata:
+      labels:
+        app: {{ include "fredboat.labels.app" . }}
+        component: lavalink
+    spec:
+      {{- if .Values.fredboat.lavalink.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.fredboat.lavalink.image.pullSecret }}
+      {{- end }}
+      containers:
+      - name: fredboat-lavalink
+        resources:
+          requests:
+            memory: 150Mi
+          limits:
+            memory: 200Mi
+        image: {{ .Values.fredboat.lavalink.image.repository }}:{{ .Values.fredboat.lavalink.image.tag }}
+        imagePullPolicy: {{ .Values.fredboat.lavalink.image.pullPolicy}}
+        command: ["java", "-Xmx128m", "-jar", "Lavalink.jar"]
+        ports:
+        - containerPort: 2333
+        volumeMounts:
+        - name: secret-volume
+          mountPath: /opt/Lavalink/application.yml
+          subPath: lavalink.yaml
+      volumes:
+        - name: secret-volume
+          secret:
+            secretName: {{ include "fredboat.fullname" . }}-configs

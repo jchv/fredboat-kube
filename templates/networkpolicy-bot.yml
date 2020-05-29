@@ -1,0 +1,57 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "fredboat.fullname" . }}-bot-networkpolicy
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ include "fredboat.labels.app" . }}
+      component: bot
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Nothing talks to Fredboat bot.
+  - from: []
+  egress:
+  # Fredboat bot talks to RabbitMQ.
+  - to:
+    - podSelector:
+        matchLabels:
+          app: {{ include "fredboat.labels.app" . }}
+          component: rabbitmq
+    ports:
+    - protocol: TCP
+      port: 5672
+  # Fredboat bot talks to Quarterdeck.
+  - to:
+    - podSelector:
+        matchLabels:
+          app: {{ include "fredboat.labels.app" . }}
+          component: quarterdeck
+    ports:
+    - protocol: TCP
+      port: 4269
+  # Fredboat bot talks to Lavalink.
+  - to:
+    - podSelector:
+        matchLabels:
+          app: {{ include "fredboat.labels.app" . }}
+          component: lavalink
+    ports:
+    - protocol: TCP
+      port: 2333
+  # Fredboat bot talks to the Internet.
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+          - 10.0.0.0/8
+          - 192.168.0.0/16
+          - 172.16.0.0/20
+  # Explicitly allow DNS.
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP

@@ -1,0 +1,81 @@
+fredboat:
+  apikeys:
+    # Google API key with YouTube Data access.
+    youtube: ""
+    # Discord bot token.
+    discord: ""
+
+  bot:
+    image:
+      # Image repository for Fredboat bot.
+      repository: fredboat/fredboat
+      # Image tag for Fredboat bot.
+      tag: dev-v4
+      # Image pull policy for Fredboat bot.
+      pullPolicy: IfNotPresent
+      # Image pull secret for Fredboat bot.
+      pullSecret: ""
+
+  lavalink:
+    # Sentry DSN for Lavalink.
+    sentryDsn: ""
+    image:
+      # Image repository for Lavalink.
+      repository: fredboat/lavalink
+      # Image tag for Lavalink.
+      tag: master
+      # Image pull policy for Lavalink.
+      pullPolicy: IfNotPresent
+      # Image pull secret for Lavalink.
+      pullSecret: ""
+
+  quarterdeck:
+    # Sentry DSN for Quarterdeck.
+    sentryDsn: ""
+    image:
+      # Image repository for Fredboat Quarterdeck.
+      repository: fredboat/quarterdeck
+      # Image tag for Fredboat Quarterdeck.
+      tag: stable-v1
+      # Image pull policy for Fredboat Quarterdeck.
+      pullPolicy: IfNotPresent
+      # Image pull secret for Fredboat Quarterdeck.
+      pullSecret: ""
+
+  sentinel:
+    image:
+      # Image repository for Fredboat Sentinel.
+      repository: fredboat/sentinel
+      # Image tag for Fredboat Sentinel.
+      tag: dev
+      # Image pull policy for Fredboat Sentinel.
+      pullPolicy: IfNotPresent
+      # Image pull secret for Fredboat Sentinel.
+      pullSecret: ""
+
+  postgres:
+    volume:
+      # Whether or not to enable PVC claim for PostgreSQL.
+      enabled: false
+      # Storage class to use for PVC claim, e.g. "do-block-stoage"
+      storageClass: ""
+    image:
+      # Image repository for PostgreSQL.
+      repository: fredboat/postgres
+      # Image tag for PostgreSQL.
+      tag: latest
+      # Image pull policy for PostgreSQL.
+      pullPolicy: IfNotPresent
+      # Image pull secret for PostgreSQL.
+      pullSecret: ""
+
+  rabbitmq:
+    image:
+      # Image repository for RabbitMQ.
+      repository: rabbitmq
+      # Image tag for RabbitMQ.
+      tag: 3-management
+      # Image pull policy for RabbitMQ.
+      pullPolicy: IfNotPresent
+      # Image pull secret for RabbitMQ.
+      pullSecret: ""

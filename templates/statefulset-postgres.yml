@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "fredboat.fullname" . }}-postgres
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "fredboat.labels.app" . }}
+      component: postgres
+  serviceName: "{{ include "fredboat.fullname" . }}-postgres"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ include "fredboat.labels.app" . }}
+        component: postgres
+    spec:
+      {{- if .Values.fredboat.postgres.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.fredboat.postgres.image.pullSecret }}
+      {{- end }}
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: fredboat-postgres
+        resources:
+          requests:
+            memory: 50Mi
+          limits:
+            memory: 100Mi
+        image: {{ .Values.fredboat.postgres.image.repository }}:{{ .Values.fredboat.postgres.image.tag }}
+        imagePullPolicy: {{ .Values.fredboat.postgres.image.pullPolicy}}
+        ports:
+        - containerPort: 5432
+          name: postgres
+        {{- if .Values.fredboat.postgres.volume.enabled }}
+        volumeMounts:
+        - name: fredboat-postgres-pvc
+          mountPath: /var/lib/postgresql
+        {{- end }}
+  {{- if .Values.fredboat.postgres.volume.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "fredboat.fullname" . }}-postgres-pvc
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.fredboat.postgres.volume.storageClass }}
+      resources:
+        requests:
+          storage: 20Gi
+  {{- end }}

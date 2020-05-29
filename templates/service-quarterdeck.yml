@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fredboat.fullname" . }}-quarterdeck
+  labels:
+    app: {{ include "fredboat.labels.app" . }}
+    component: quarterdeck
+    chart: {{ include "fredboat.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+  - port: 4269
+    name: quarterdeck
+  clusterIP: None
+  selector:
+    app: {{ include "fredboat.labels.app" . }}
+    component: quarterdeck
